@@ -195,7 +195,7 @@ async function startServer() {
     try {
       await updateShop(req, res);
       if (res.statusCode < 400) {
-        await logAudit(req.user.userId, 'UPDATE_SHOP', `Super Admin updated Shop status (ID: ${req.params.id})`, 'b1', 'super_admin_shop', req);
+        await logAudit(req.user.userId, 'UPDATE_SHOP', `Super Admin updated Shop status (ID: ${req.params.id})`, req.tenantBranchId, 'super_admin_shop', req);
       }
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -207,7 +207,7 @@ async function startServer() {
     try {
       await deleteShop(req, res);
       if (res.statusCode < 400) {
-        await logAudit(req.user.userId, 'DELETE_SHOP', `Super Admin deleted Shop (ID: ${req.params.id})`, 'b1', 'super_admin_shop', req);
+        await logAudit(req.user.userId, 'DELETE_SHOP', `Super Admin deleted Shop (ID: ${req.params.id})`, req.tenantBranchId, 'super_admin_shop', req);
       }
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -219,7 +219,7 @@ async function startServer() {
     try {
       await resetShopOwnerPassword(req, res);
       if (res.statusCode < 400) {
-        await logAudit(req.user.userId, 'PASSWORD_RESET', `Super Admin reset owner password for Shop ID: ${req.body.shopId}`, 'b1', 'super_admin_shop', req);
+        await logAudit(req.user.userId, 'PASSWORD_RESET', `Super Admin reset owner password for Shop ID: ${req.body.shopId}`, req.tenantBranchId, 'super_admin_shop', req);
       }
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -409,7 +409,7 @@ async function startServer() {
     try {
       await createBranch(req, res);
       if (res.statusCode === 201) {
-        await logAudit(req.user.userId, 'CREATE_BRANCH', `Created Branch: ${req.body.name}`, 'b1', req.user.shopId, req);
+        await logAudit(req.user.userId, 'CREATE_BRANCH', `Created Branch: ${req.body.name}`, req.body.branchId || req.tenantBranchId, req.user.shopId, req);
       }
     } catch (err: any) {
       res.status(500).json({ error: err.message });
