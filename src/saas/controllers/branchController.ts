@@ -35,6 +35,7 @@ export async function createBranch(req: AuthenticatedRequest, res: Response) {
     };
 
     const saved = await dbManager.saveBranch(newBranch);
+    res.locals.newBranch = saved; // Make the new branch available to subsequent middleware
     res.status(201).json(saved);
   } catch (err: any) {
     res.status(500).json({ error: err.message });

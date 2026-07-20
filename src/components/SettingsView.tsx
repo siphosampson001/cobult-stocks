@@ -30,6 +30,7 @@ interface SettingsViewProps {
   taxPercentage: number;
   setTaxPercentage: (val: number) => void;
   onRestoreBackup: () => void;
+  tenantBranches: Branch[];
 }
 
 export default function SettingsView({
@@ -38,7 +39,8 @@ export default function SettingsView({
   setCurrencySymbol,
   taxPercentage,
   setTaxPercentage,
-  onRestoreBackup
+  onRestoreBackup,
+  tenantBranches
 }: SettingsViewProps) {
   // Local Settings form state
   const [storeName, setStoreName] = useState('Cobult Stocks Retail');
@@ -54,7 +56,6 @@ export default function SettingsView({
   const [mongoStatus, setMongoStatus] = useState<{ enabled: boolean; connected: boolean }>({ enabled: false, connected: false });
   const [loadingMongo, setLoadingMongo] = useState(true);
   const [tenantUsers, setTenantUsers] = useState<User[]>([]);
-  const [tenantBranches, setTenantBranches] = useState<Branch[]>([]);
   const [loadingTenantData, setLoadingTenantData] = useState(true);
   const [userForm, setUserForm] = useState({
     username: '',
@@ -80,13 +81,9 @@ export default function SettingsView({
         setLoadingMongo(false);
       });
 
-    Promise.all([
-      fetch('/api/users', { headers }),
-      fetch('/api/branches', { headers }),
-    ])
-      .then(async ([usersRes, branchesRes]) => {
+    fetch('/api/users', { headers })
+      .then(async (usersRes) => {
         if (usersRes.ok) setTenantUsers(await usersRes.json());
-        if (branchesRes.ok) setTenantBranches(await branchesRes.json());
       })
       .catch(err => {
         console.error('[SettingsView] Failed to load tenant user data:', err);

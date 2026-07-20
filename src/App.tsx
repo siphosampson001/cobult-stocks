@@ -128,6 +128,7 @@ export default function App() {
   const [purchases, setPurchases] = useState<PurchaseOrder[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [quotations, setQuotations] = useState<Quotation[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [dashboardStats, setDashboardStats] = useState<any>(null);
 
   // System Configurations
@@ -323,6 +324,10 @@ export default function App() {
       // 7. Fetch Quotations
       const quotRes = await fetchWithAuth(`/api/quotations?branchId=${branchId}`);
       if (quotRes.ok) setQuotations(await quotRes.json());
+
+      // 8. Fetch Branches
+      const branchRes = await fetchWithAuth('/api/branches');
+      if (branchRes.ok) setBranches(await branchRes.json());
 
       setLastSyncedTime(new Date());
 
@@ -810,7 +815,7 @@ export default function App() {
         return <ReportsAuditsView sales={sales} auditLogs={auditLogs} products={products} currencySymbol={currencySymbol} userRole={currentUser.role} taxPercentage={taxPercentage} />;
       case 'settings':
         if (currentUser.role === UserRole.CASHIER) return <div className="text-center py-12 text-slate-400">Access Denied</div>;
-        return <SettingsView userRole={currentUser.role} currencySymbol={currencySymbol} setCurrencySymbol={setCurrencySymbol} taxPercentage={taxPercentage} setTaxPercentage={setTaxPercentage} onRestoreBackup={handleRestoreBackup} />;
+        return <SettingsView userRole={currentUser.role} currencySymbol={currencySymbol} setCurrencySymbol={setCurrencySymbol} taxPercentage={taxPercentage} setTaxPercentage={setTaxPercentage} onRestoreBackup={handleRestoreBackup} tenantBranches={branches} />;
       default:
         return <DashboardView stats={dashboardStats} userRole={currentUser.role} currencySymbol={currencySymbol} />;
     }
@@ -855,8 +860,9 @@ export default function App() {
                   onChange={(e) => setBranchId(e.target.value)}
                   className="bg-transparent border-none text-[#94A3B8] focus:ring-0 cursor-pointer font-sans p-0 text-[10px] outline-none"
                 >
-                  <option value="b1" className="bg-[#16191F] text-white">Harare CBD Branch</option>
-                  <option value="b2" className="bg-[#16191F] text-white">Bulawayo City Branch</option>
+                  {branches.map(b => (
+                    <option key={b.id} value={b.id} className="bg-[#16191F] text-white">{b.name}</option>
+                  ))}
                   <option value="all" className="bg-[#16191F] text-white">All Branches (HQ Overview)</option>
                 </select>
               ) : currentUser?.role === UserRole.MANAGER ? (
@@ -865,13 +871,11 @@ export default function App() {
                   onChange={(e) => setBranchId(e.target.value)}
                   className="bg-transparent border-none text-[#94A3B8] focus:ring-0 cursor-pointer font-sans p-0 text-[10px] outline-none"
                 >
-                  <option value={currentUser.branchId} className="bg-[#16191F] text-white">
-                    {currentUser.branchId === 'b1' ? 'Harare CBD Branch' : 'Bulawayo City Branch'}
-                  </option>
+                  {branches.filter(b => b.id === currentUser.branchId).map(b => <option key={b.id} value={b.id} className="bg-[#16191F] text-white">{b.name}</option>)}
                   <option value="all" className="bg-[#16191F] text-white">All Branches (HQ Overview)</option>
                 </select>
               ) : (
-                <span>{branchId === 'b1' ? 'Harare CBD Branch' : 'Bulawayo City Branch'}</span>
+                <span>{branches.find(b => b.id === branchId)?.name || 'Main Branch'}</span>
               )}
             </div>
           </div>
